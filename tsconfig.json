@@ -1,0 +1,63 @@
+{
+  "compilerOptions": {
+    "target": "esnext",
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "strict": true,
+    "jsx": "preserve",
+    "sourceMap": true,
+    "outDir": "dist",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strictNullChecks": true,
+    "noImplicitAny": true,
+    "noImplicitThis": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": ["./src/*"]
+    },
+    "plugins": [
+      {
+        "name": "next-transpile-modules",
+        "transpileModules": [
+          "@prisma/client"
+        ]
+      }
+    ],
+    "types": [
+      "vitest"
+    ]
+  },
+  "include": [
+    "src",
+    "pages",
+    "components",
+    "lib",
+    "styles",
+    "tests",
+    "config",
+    "prisma",
+    "types",
+    "context",
+    "services",
+    "scripts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    "coverage",
+    "cypress",
+    "public"
+  ],
+  "references": [
+    {
+      "path": "./prisma/schema.prisma"
+    }
+  ]
+}
