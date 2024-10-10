@@ -1,0 +1,264 @@
+// tests/integration/api.js
+
+import { describe, expect, test, beforeAll, afterAll } from 'vitest';
+import request from 'supertest';
+import app from '../../app';
+import { prisma } from '../../lib/prisma';
+import { Goal } from '../../lib/types/goal';
+import { ProgressEntry } from '../../lib/types/progress';
+
+describe('API Endpoints', () => {
+  beforeAll(async () => {
+    // Seed the database with test data
+    await prisma.goal.createMany({
+      data: [
+        { name: 'Lose Weight', targetDate: new Date('2024-01-01'), progress: 5, target: 10, userId: 1 },
+        { name: 'Gain Muscle', targetDate: new Date('2024-03-15'), progress: 2, target: 8, userId: 1 },
+      ],
+    });
+
+    await prisma.progressEntry.createMany({
+      data: [
+        { value: 180, date: new Date('2023-12-15'), goalId: 1, userId: 1 },
+        { value: 178, date: new Date('2023-12-16'), goalId: 1, userId: 1 },
+        { value: 175, date: new Date('2023-12-17'), goalId: 1, userId: 1 },
+        { value: 170, date: new Date('2023-12-18'), goalId: 1, userId: 1 },
+        { value: 172, date: new Date('2023-12-19'), goalId: 1, userId: 1 },
+      ],
+    });
+  });
+
+  afterAll(async () => {
+    // Clean up the database after testing
+    await prisma.$disconnect();
+  });
+
+  test('GET /api/goals', async () => {
+    // Mock user authentication (consider using `next-auth/testing`)
+    const token = 'your_jwt_token';
+    const response = await request(app)
+      .get('/api/goals')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toBeInstanceOf(Array);
+    expect(response.body.length).toBeGreaterThanOrEqual(2);
+    expect(response.body[0]).toHaveProperty('id');
+    expect(response.body[0]).toHaveProperty('name');
+    expect(response.body[0]).toHaveProperty('targetDate');
+    expect(response.body[0]).toHaveProperty('progress');
+    expect(response.body[0]).toHaveProperty('target');
+    expect(response.body[0]).toHaveProperty('userId');
+  });
+
+  test('GET /api/goals/:id', async () => {
+    // Mock user authentication (consider using `next-auth/testing`)
+    const token = 'your_jwt_token';
+    const goalId = 1; // Replace with the actual goal ID
+    const response = await request(app)
+      .get(`/api/goals/${goalId}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('id');
+    expect(response.body).toHaveProperty('name');
+    expect(response.body).toHaveProperty('targetDate');
+    expect(response.body).toHaveProperty('progress');
+    expect(response.body).toHaveProperty('target');
+    expect(response.body).toHaveProperty('userId');
+  });
+
+  test('POST /api/goals', async () => {
+    // Mock user authentication (consider using `next-auth/testing`)
+    const token = 'your_jwt_token';
+    const newGoal: Goal = {
+      name: 'Run a Marathon',
+      targetDate: new Date('2024-12-25'),
+      progress: 0, // Initial progress
+      target: 42, // Marathon distance in kilometers
+      userId: 1, // Replace with the actual user ID
+    };
+    const response = await request(app)
+      .post('/api/goals')
+      .set('Authorization', `Bearer ${token}`)
+      .send(newGoal);
+
+    expect(response.status).toBe(201);
+    expect(response.body).toHaveProperty('id');
+    expect(response.body).toHaveProperty('name', newGoal.name);
+    expect(response.body).toHaveProperty('targetDate');
+    expect(response.body).toHaveProperty('progress', newGoal.progress);
+    expect(response.body).toHaveProperty('target', newGoal.target);
+    expect(response.body).toHaveProperty('userId');
+  });
+
+  test('PUT /api/goals/:id', async () => {
+    // Mock user authentication (consider using `next-auth/testing`)
+    const token = 'your_jwt_token';
+    const goalId = 1; // Replace with the actual goal ID
+    const updatedGoal: Goal = {
+      name: 'Lose Weight Faster',
+      targetDate: new Date('2024-01-15'),
+      progress: 5, // Update progress if necessary
+      target: 10, // Update target if necessary
+      userId: 1, // Replace with the actual user ID
+    };
+    const response = await request(app)
+      .put(`/api/goals/${goalId}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send(updatedGoal);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('id', goalId);
+    expect(response.body).toHaveProperty('name', updatedGoal.name);
+    expect(response.body).toHaveProperty('targetDate', updatedGoal.targetDate);
+    expect(response.body).toHaveProperty('progress', updatedGoal.progress);
+    expect(response.body).toHaveProperty('target', updatedGoal.target);
+    expect(response.body).toHaveProperty('userId');
+  });
+
+  test('DELETE /api/goals/:id', async () => {
+    // Mock user authentication (consider using `next-auth/testing`)
+    const token = 'your_jwt_token';
+    const goalId = 1; // Replace with the actual goal ID
+    const response = await request(app)
+      .delete(`/api/goals/${goalId}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.status).toBe(204);
+  });
+
+  test('GET /api/progress', async () => {
+    // Mock user authentication (consider using `next-auth/testing`)
+    const token = 'your_jwt_token';
+    const response = await request(app)
+      .get('/api/progress')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toBeInstanceOf(Array);
+    expect(response.body.length).toBeGreaterThanOrEqual(5);
+    expect(response.body[0]).toHaveProperty('id');
+    expect(response.body[0]).toHaveProperty('value');
+    expect(response.body[0]).toHaveProperty('date');
+    expect(response.body[0]).toHaveProperty('goalId');
+    expect(response.body[0]).toHaveProperty('userId');
+  });
+
+  test('POST /api/progress', async () => {
+    // Mock user authentication (consider using `next-auth/testing`)
+    const token = 'your_jwt_token';
+    const newProgressEntry: ProgressEntry = {
+      value: 170,
+      date: new Date('2023-12-20'),
+      goalId: 1, // Replace with the actual goal ID
+      userId: 1, // Replace with the actual user ID
+    };
+    const response = await request(app)
+      .post('/api/progress')
+      .set('Authorization', `Bearer ${token}`)
+      .send(newProgressEntry);
+
+    expect(response.status).toBe(201);
+    expect(response.body).toHaveProperty('id');
+    expect(response.body).toHaveProperty('value', newProgressEntry.value);
+    expect(response.body).toHaveProperty('date');
+    expect(response.body).toHaveProperty('goalId', newProgressEntry.goalId);
+    expect(response.body).toHaveProperty('userId');
+  });
+
+  test('PUT /api/progress/:id', async () => {
+    // Mock user authentication (consider using `next-auth/testing`)
+    const token = 'your_jwt_token';
+    const progressEntryId = 1; // Replace with the actual progress entry ID
+    const updatedProgressEntry: ProgressEntry = {
+      value: 185,
+      date: new Date('2023-12-15'),
+      goalId: 1, // Replace with the actual goal ID
+      userId: 1, // Replace with the actual user ID
+    };
+    const response = await request(app)
+      .put(`/api/progress/${progressEntryId}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send(updatedProgressEntry);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('id', progressEntryId);
+    expect(response.body).toHaveProperty('value', updatedProgressEntry.value);
+    expect(response.body).toHaveProperty('date', updatedProgressEntry.date);
+    expect(response.body).toHaveProperty('goalId', updatedProgressEntry.goalId);
+    expect(response.body).toHaveProperty('userId');
+  });
+
+  test('DELETE /api/progress/:id', async () => {
+    // Mock user authentication (consider using `next-auth/testing`)
+    const token = 'your_jwt_token';
+    const progressEntryId = 1; // Replace with the actual progress entry ID
+    const response = await request(app)
+      .delete(`/api/progress/${progressEntryId}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.status).toBe(204);
+  });
+
+  test('GET /api/users/me', async () => {
+    // Mock user authentication (consider using `next-auth/testing`)
+    const token = 'your_jwt_token';
+    const response = await request(app)
+      .get('/api/users/me')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('id');
+    expect(response.body).toHaveProperty('email');
+    expect(response.body).toHaveProperty('password');
+    expect(response.body).toHaveProperty('goals');
+  });
+
+  test('GET /api/users', async () => {
+    // Mock user authentication (consider using `next-auth/testing`)
+    const token = 'your_jwt_token';
+    const response = await request(app)
+      .get('/api/users')
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toBeInstanceOf(Array);
+    expect(response.body.length).toBeGreaterThanOrEqual(1);
+    expect(response.body[0]).toHaveProperty('id');
+    expect(response.body[0]).toHaveProperty('email');
+    expect(response.body[0]).toHaveProperty('password');
+    expect(response.body[0]).toHaveProperty('goals');
+  });
+
+  test('PUT /api/users/:id', async () => {
+    // Mock user authentication (consider using `next-auth/testing`)
+    const token = 'your_jwt_token';
+    const userId = 1; // Replace with the actual user ID
+    const updatedUser = {
+      email: 'updated@example.com',
+      password: 'updatedPassword', // Use a strong password hashing algorithm
+      // Other user details to update
+    };
+    const response = await request(app)
+      .put(`/api/users/${userId}`)
+      .set('Authorization', `Bearer ${token}`)
+      .send(updatedUser);
+
+    expect(response.status).toBe(200);
+    expect(response.body).toHaveProperty('id', userId);
+    expect(response.body).toHaveProperty('email', updatedUser.email);
+    expect(response.body).toHaveProperty('password'); // Hashing should be handled by the API
+  });
+
+  test('DELETE /api/users/:id', async () => {
+    // Mock user authentication (consider using `next-auth/testing`)
+    const token = 'your_jwt_token';
+    const userId = 1; // Replace with the actual user ID
+    const response = await request(app)
+      .delete(`/api/users/${userId}`)
+      .set('Authorization', `Bearer ${token}`);
+
+    expect(response.status).toBe(204);
+  });
+});
