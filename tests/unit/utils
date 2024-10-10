@@ -1,0 +1,132 @@
+// tests/unit/utils.js
+
+import {
+  calculateGoalProgress,
+  calculateAverageProgress,
+  calculateWeightDifference,
+  formatDate,
+  validateUser,
+  validateGoal,
+  validateProgressEntry,
+} from '@/lib/utils';
+import { Goal, ProgressEntry, User } from '@/lib/types';
+
+describe('Utils', () => {
+  describe('calculateGoalProgress', () => {
+    it('should return 0 if goal is undefined or incomplete', () => {
+      expect(calculateGoalProgress(undefined)).toBe(0);
+      expect(
+        calculateGoalProgress({ name: 'Lose Weight', targetDate: new Date('2024-01-01'), target: 10 }),
+      ).toBe(0);
+    });
+
+    it('should return the correct progress percentage', () => {
+      const goal: Goal = {
+        id: 1,
+        name: 'Lose Weight',
+        targetDate: new Date('2024-01-01'),
+        progress: 5,
+        target: 10,
+        userId: 1,
+      };
+      expect(calculateGoalProgress(goal)).toBe(50);
+    });
+  });
+
+  describe('calculateAverageProgress', () => {
+    it('should return null if progressEntries is empty', () => {
+      expect(calculateAverageProgress([])).toBeNull();
+    });
+
+    it('should return the correct average progress value', () => {
+      const progressEntries: ProgressEntry[] = [
+        { id: 1, value: 5, date: new Date('2023-12-15'), goalId: 1, userId: 1 },
+        { id: 2, value: 7, date: new Date('2023-12-16'), goalId: 1, userId: 1 },
+        { id: 3, value: 3, date: new Date('2023-12-17'), goalId: 1, userId: 1 },
+      ];
+      expect(calculateAverageProgress(progressEntries)).toBe(5);
+    });
+  });
+
+  describe('calculateWeightDifference', () => {
+    it('should return null if either entry is missing weight data', () => {
+      const entry1: ProgressEntry = { id: 1, value: 5, date: new Date('2023-12-15'), goalId: 1, userId: 1 };
+      const entry2: ProgressEntry = { id: 2, date: new Date('2023-12-16'), goalId: 1, userId: 1 };
+      expect(calculateWeightDifference(entry1, entry2)).toBeNull();
+    });
+
+    it('should return the correct weight difference', () => {
+      const entry1: ProgressEntry = { id: 1, value: 180, date: new Date('2023-12-15'), goalId: 1, userId: 1 };
+      const entry2: ProgressEntry = { id: 2, value: 175, date: new Date('2023-12-16'), goalId: 1, userId: 1 };
+      expect(calculateWeightDifference(entry1, entry2)).toBe(5);
+    });
+  });
+
+  describe('formatDate', () => {
+    it('should return N/A if date is undefined', () => {
+      expect(formatDate(undefined)).toBe('N/A');
+    });
+
+    it('should return the formatted date string', () => {
+      const date = new Date('2024-01-01');
+      expect(formatDate(date)).toBe('January 1, 2024');
+    });
+  });
+
+  describe('validateUser', () => {
+    it('should return an error message if email or password is missing', () => {
+      expect(validateUser({ email: 'user@example.com' })).toBe('Email and password are required.');
+      expect(validateUser({ password: 'password123' })).toBe('Email and password are required.');
+      expect(validateUser({})).toBe('Email and password are required.');
+    });
+
+    it('should return an error message if email format is invalid', () => {
+      expect(validateUser({ email: 'invalid-email', password: 'password123' })).toBe('Invalid email format.');
+    });
+
+    it('should return an error message if password is less than 8 characters', () => {
+      expect(validateUser({ email: 'user@example.com', password: 'short' })).toBe('Password must be at least 8 characters long.');
+    });
+
+    it('should return null if user is valid', () => {
+      expect(validateUser({ email: 'user@example.com', password: 'password123' })).toBeNull();
+    });
+  });
+
+  describe('validateGoal', () => {
+    it('should return an error message if name or targetDate is missing', () => {
+      expect(validateGoal({ name: 'Lose Weight' })).toBe('Goal name and target date are required.');
+      expect(validateGoal({ targetDate: new Date('2024-01-01') })).toBe('Goal name and target date are required.');
+      expect(validateGoal({})).toBe('Goal name and target date are required.');
+    });
+
+    it('should return an error message if targetDate is in the past', () => {
+      const pastDate = new Date('2023-12-31');
+      expect(validateGoal({ name: 'Lose Weight', targetDate: pastDate })).toBe('Target date must be in the future.');
+    });
+
+    it('should return null if goal is valid', () => {
+      const futureDate = new Date('2024-01-01');
+      expect(validateGoal({ name: 'Lose Weight', targetDate: futureDate })).toBeNull();
+    });
+  });
+
+  describe('validateProgressEntry', () => {
+    it('should return an error message if value, date, or goalId is missing', () => {
+      expect(validateProgressEntry({ value: 5, date: new Date('2023-12-15') })).toBe('Progress entry value, date, and goal ID are required.');
+      expect(validateProgressEntry({ date: new Date('2023-12-15'), goalId: 1 })).toBe('Progress entry value, date, and goal ID are required.');
+      expect(validateProgressEntry({ value: 5, goalId: 1 })).toBe('Progress entry value, date, and goal ID are required.');
+      expect(validateProgressEntry({})).toBe('Progress entry value, date, and goal ID are required.');
+    });
+
+    it('should return an error message if date is in the future', () => {
+      const futureDate = new Date('2024-01-01');
+      expect(validateProgressEntry({ value: 5, date: futureDate, goalId: 1 })).toBe('Progress entry date must be in the past.');
+    });
+
+    it('should return null if progressEntry is valid', () => {
+      const pastDate = new Date('2023-12-15');
+      expect(validateProgressEntry({ value: 5, date: pastDate, goalId: 1 })).toBeNull();
+    });
+  });
+});
