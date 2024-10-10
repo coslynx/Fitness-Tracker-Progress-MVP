@@ -1,0 +1,231 @@
+// tests/unit/components.js
+
+import { render, screen } from '@testing-library/react';
+import { Button, Card, Modal, Input, Select, Spinner } from '@/components/ui';
+import { LoginForm, SignupForm } from '@/components/features/auth';
+import { GoalCard, GoalForm, GoalList } from '@/components/features/goals';
+import { ProgressChart, ProgressLog } from '@/components/features/progress';
+import { DashboardStats, RecentActivity } from '@/components/features/dashboard';
+import { CommunityFeed, UserProfile } from '@/components/features/community';
+import { User } from '@/lib/types/user';
+import { Goal } from '@/lib/types/goal';
+import { ProgressEntry } from '@/lib/types/progress';
+import { UserContext } from '@/context/AuthContext';
+import { ThemeProvider } from '@/context/ThemeContext';
+
+// Mock data for testing
+const mockUser: User = {
+  id: 1,
+  email: 'test@example.com',
+  password: 'password123',
+  goals: [],
+};
+
+const mockGoal: Goal = {
+  id: 1,
+  name: 'Lose Weight',
+  targetDate: new Date('2024-01-01'),
+  progress: 5,
+  target: 10,
+  userId: 1,
+};
+
+const mockProgressEntry: ProgressEntry = {
+  id: 1,
+  value: 180,
+  date: new Date('2023-12-15'),
+  goalId: 1,
+  userId: 1,
+};
+
+// Function to wrap components for testing context and themes
+const renderWithContext = (component: React.ReactElement) => {
+  return render(
+    <ThemeProvider>
+      <UserContext.Provider value={{ user: mockUser, setUserSession: jest.fn() }}>
+        {component}
+      </UserContext.Provider>
+    </ThemeProvider>
+  );
+};
+
+// Tests for Button component
+describe('Button', () => {
+  it('renders with correct text', () => {
+    renderWithContext(<Button>Click Me</Button>);
+    expect(screen.getByText('Click Me')).toBeInTheDocument();
+  });
+
+  // Add more tests for different button variants, sizes, and states
+});
+
+// Tests for Card component
+describe('Card', () => {
+  it('renders with correct title', () => {
+    renderWithContext(<Card title="My Card">Content</Card>);
+    expect(screen.getByText('My Card')).toBeInTheDocument();
+  });
+
+  // Add more tests for different card styles and content
+});
+
+// Tests for Modal component
+describe('Modal', () => {
+  it('opens and closes correctly', () => {
+    renderWithContext(<Modal isOpen={true} onClose={jest.fn()} />);
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+    // Simulate closing the modal (e.g., clicking close button)
+    // ...
+  });
+
+  // Add more tests for modal content and interactions
+});
+
+// Tests for Input component
+describe('Input', () => {
+  it('renders with correct label', () => {
+    renderWithContext(<Input label="Email" />);
+    expect(screen.getByLabelText('Email')).toBeInTheDocument();
+  });
+
+  // Add more tests for different input types, states, and validation
+});
+
+// Tests for Select component
+describe('Select', () => {
+  it('renders with correct options', () => {
+    renderWithContext(<Select label="Category" options={['weight_loss', 'muscle_gain']} />);
+    expect(screen.getByLabelText('Category')).toBeInTheDocument();
+    // ...
+  });
+
+  // Add more tests for select value updates and interactions
+});
+
+// Tests for Spinner component
+describe('Spinner', () => {
+  it('renders correctly', () => {
+    renderWithContext(<Spinner />);
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+  });
+
+  // Add more tests for different spinner sizes and colors
+});
+
+// Tests for LoginForm component
+describe('LoginForm', () => {
+  it('renders with correct form fields', () => {
+    renderWithContext(<LoginForm />);
+    expect(screen.getByLabelText('Email')).toBeInTheDocument();
+    expect(screen.getByLabelText('Password')).toBeInTheDocument();
+  });
+
+  // Add more tests for form submission, error handling, and interactions
+});
+
+// Tests for SignupForm component
+describe('SignupForm', () => {
+  it('renders with correct form fields', () => {
+    renderWithContext(<SignupForm />);
+    expect(screen.getByLabelText('Email')).toBeInTheDocument();
+    expect(screen.getByLabelText('Password')).toBeInTheDocument();
+  });
+
+  // Add more tests for form submission, error handling, and interactions
+});
+
+// Tests for GoalCard component
+describe('GoalCard', () => {
+  it('renders with correct goal information', () => {
+    renderWithContext(<GoalCard goal={mockGoal} />);
+    expect(screen.getByText(mockGoal.name)).toBeInTheDocument();
+    expect(screen.getByText(mockGoal.targetDate.toLocaleDateString())).toBeInTheDocument();
+    expect(screen.getByText(`Progress: ${mockGoal.progress} / ${mockGoal.target}`)).toBeInTheDocument();
+  });
+
+  // Add more tests for goal card actions (navigation, updates, deletion)
+});
+
+// Tests for GoalForm component
+describe('GoalForm', () => {
+  it('renders with correct form fields', () => {
+    renderWithContext(<GoalForm onClose={jest.fn()} />);
+    expect(screen.getByLabelText('Name')).toBeInTheDocument();
+    expect(screen.getByLabelText('Target Date')).toBeInTheDocument();
+    expect(screen.getByLabelText('Category')).toBeInTheDocument();
+  });
+
+  // Add more tests for form submission, error handling, and interactions
+});
+
+// Tests for GoalList component
+describe('GoalList', () => {
+  it('renders a list of goal cards', () => {
+    renderWithContext(<GoalList />);
+    // ...
+  });
+
+  // Add more tests for goal list interactions (adding goals, filtering)
+});
+
+// Tests for ProgressChart component
+describe('ProgressChart', () => {
+  it('renders a chart with progress data', () => {
+    renderWithContext(<ProgressChart progress={[mockProgressEntry]} />);
+    // ...
+  });
+
+  // Add more tests for different chart types and visualization options
+});
+
+// Tests for ProgressLog component
+describe('ProgressLog', () => {
+  it('renders a list of progress entries', () => {
+    renderWithContext(<ProgressLog progress={[mockProgressEntry]} />);
+    expect(screen.getByText(mockProgressEntry.date.toLocaleDateString())).toBeInTheDocument();
+    expect(screen.getByText(`Value: ${mockProgressEntry.value}`)).toBeInTheDocument();
+  });
+
+  // Add more tests for progress log interactions (adding entries, updating)
+});
+
+// Tests for DashboardStats component
+describe('DashboardStats', () => {
+  it('renders with correct stats', () => {
+    renderWithContext(<DashboardStats user={mockUser} goals={[mockGoal]} progress={[mockProgressEntry]} />);
+    // ...
+  });
+
+  // Add more tests for different stats and interactions
+});
+
+// Tests for RecentActivity component
+describe('RecentActivity', () => {
+  it('renders a list of recent activities', () => {
+    renderWithContext(<RecentActivity progress={[mockProgressEntry]} goals={[mockGoal]} />);
+    // ...
+  });
+
+  // Add more tests for activity log interactions (filtering, navigation)
+});
+
+// Tests for CommunityFeed component
+describe('CommunityFeed', () => {
+  it('renders a feed of community posts', () => {
+    renderWithContext(<CommunityFeed />);
+    // ...
+  });
+
+  // Add more tests for community feed interactions (creating posts, commenting)
+});
+
+// Tests for UserProfile component
+describe('UserProfile', () => {
+  it('renders user profile information', () => {
+    renderWithContext(<UserProfile user={mockUser} goal={mockGoal} />);
+    expect(screen.getByText(mockUser.email)).toBeInTheDocument();
+    expect(screen.getByText(mockGoal.name)).toBeInTheDocument();
+  });
+
+  // Add more tests for user profile interactions (following, messaging)
+});
