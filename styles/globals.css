@@ -1,0 +1,130 @@
+/* styles/globals.css */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Import Inter font styles */
+@import url('/fonts/inter.css');
+
+/* Global body styles */
+body {
+  font-family: 'Inter', sans-serif;
+  background-color: #f5f5f5;
+  color: #333;
+  line-height: 1.6;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Global link styles */
+a {
+  color: #007bff;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+/* Global button styles */
+button {
+  cursor: pointer;
+}
+
+/* Global input styles */
+input,
+textarea {
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  padding: 8px;
+  font-size: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 16px;
+}
+
+/* Global heading styles */
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-weight: bold;
+}
+
+h1 {
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+}
+
+h2 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+/* Global container styles */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
+}
+
+/* Global grid styles */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: 1rem;
+}
+
+/* Global form styles */
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+/* Global error styles */
+.error {
+  color: red;
+}
+
+/* Global loading spinner styles */
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+/* Global responsiveness */
+@media screen and (max-width: 768px) {
+  .grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Global dark mode styles */
+@media (prefers-color-scheme: dark) {
+  body {
+    background-color: #222;
+    color: #fff;
+  }
+
+  a {
+    color: #fff;
+  }
+
+  input,
+  textarea {
+    border: 1px solid #fff;
+    color: #fff;
+  }
+}
